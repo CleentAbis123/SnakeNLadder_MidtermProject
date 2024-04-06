@@ -9,7 +9,7 @@ w = 1366
 h = 768
 
 icon = pygame.image.load("img/icon.jpg")
-GD = pygame.display.set_mode((w, h), pygame.FULLSCREEN)
+GD = pygame.display.set_mode((w, h))
 pygame.display.set_caption("Snakes N Ladders")
 pygame.display.set_icon(icon)
 pygame.display.update()
