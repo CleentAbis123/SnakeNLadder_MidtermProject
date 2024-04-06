@@ -45,7 +45,6 @@ intbg2 = pygame.image.load("img/intropic2.jpg")
 intbg3 = pygame.image.load("img/intropic3.jpg")
 intbg4 = pygame.image.load("img/intropic4.jpg")
 intbg5 = pygame.image.load("img/intropic5.jpg")
-credits1 = pygame.image.load("img/credits.jpg")
 
 pygame.mixer.music.load("sounds/music.wav")
 snakesound = pygame.mixer.Sound("sounds/snake.wav")
@@ -282,12 +281,22 @@ def button(text, xmouse, ymouse, x, y, w, h, i, a, fs, b):
 
 
 def intro():
+    intro_music = pygame.mixer.Sound("sounds/intro_music.wav")
+
+    intro_music_played = False
+
     time = pygame.time.get_ticks()
     while pygame.time.get_ticks() - time < 2500:
+        if not intro_music_played:
+            intro_music.play(-1)
+            intro_music_played = True
+
         GD.blit(intbg, (0, 0))
         pygame.display.update()
+
     while True:
         time = pygame.time.get_ticks()
+        intro_music.stop()
         while pygame.time.get_ticks() - time < 500:
             GD.blit(intbg2, (0, 0))
             pygame.display.update()
@@ -310,48 +319,65 @@ def intro():
         pygame.display.update()
 
 
-def credit():
-    while True:
-        GD.blit(credits1, (0, 0))
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    Quit()
-        mouse = pygame.mouse.get_pos()
-        click = pygame.mouse.get_pressed()
-        if button("Back", mouse[0], mouse[1], w / 2 - 100, 700, 200, 50, red, b_red, 25, 20):
-            main()
+def button_image(image_path, xmouse, ymouse, x, y, w, h, action=None):
+    button_img = pygame.image.load(image_path)
 
-        pygame.display.update()
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+
+    if x + w > xmouse > x and y + h > ymouse > y:
+        GD.blit(button_img, (x, y))
+        if click[0] == 1 and action is not None:
+            return action
+    else:
+        GD.blit(button_img, (x, y))
 
 
 def main():
     pygame.mixer.music.play(-1)
 
     menu = True
+    play_music_clicked = True
+    mute_clicked = False
+
     while menu:
+        mouse = pygame.mouse.get_pos()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 Quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     Quit()
-
-        mouse = pygame.mouse.get_pos()
-        click = pygame.mouse.get_pressed()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    mouse = pygame.mouse.get_pos()
+                    if (w / 2 - 100) <= mouse[0] <= (w / 2 + 100) and (h / 2) <= mouse[1] <= (h / 2 + 100):
+                        play(2)
+                    elif (w / 2 - 100) <= mouse[0] <= (w / 2 + 100) and (h / 2 + 200) <= mouse[1] <= (h / 2 + 300):
+                        Quit()
+                    elif 1166 <= mouse[0] <= 1366 and 75 <= mouse[1] <= 125:
+                        pygame.mixer.music.pause()
+                        mute_clicked = not mute_clicked
+                        play_music_clicked = False
+                    elif 1166 <= mouse[0] <= 1366 and 0 <= mouse[1] <= 50:
+                        pygame.mixer.music.unpause()
+                        play_music_clicked = True
+                        mute_clicked = False
 
         GD.blit(menubg, (0, 0))
-        button("Play", mouse[0], mouse[1], (w / 2 - 100), h / 2, 200, 100, green, b_green, 60, 1)
+        button_image("img/play.png", mouse[0], mouse[1], (w / 2 - 100), h / 2, 200, 100)
+        button_image("img/quit.png", mouse[0], mouse[1], (w / 2 - 100), (h / 2) + 200, 200, 100)
 
-        button("Quit", mouse[0], mouse[1], (w / 2 - 100), (h / 2) + 200, 200, 100, red, b_red, 60, 0)
+        if mute_clicked:
+            button_image("img/mute.png", mouse[0], mouse[1], 1166, 0, 200, 50)
+        else:
+            button_image("img/mute1.png", mouse[0], mouse[1], 1166, 0, 200, 50)
 
-        mouse = pygame.mouse.get_pos()
-        if button2("Mute Music", mouse[0], mouse[1], 1166, 0, 200, 50, purple, b_purple, 25):
-            pygame.mixer.music.pause()
-        if button2("Play Music", mouse[0], mouse[1], 1166, 75, 200, 50, purple, b_purple, 25):
-            pygame.mixer.music.unpause()
-        if button2("Credits", mouse[0], mouse[1], 1166, 150, 200, 50, purple, b_purple, 25):
-            credit()
+        if play_music_clicked:
+            button_image("img/play_music.png", mouse[0], mouse[1], 1166, 75, 200, 50)
+        else:
+            button_image("img/play_music1.png", mouse[0], mouse[1], 1166, 75, 200, 50)
 
         pygame.display.update()
 
